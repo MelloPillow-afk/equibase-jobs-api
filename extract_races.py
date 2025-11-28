@@ -65,27 +65,101 @@ def parse_distance_surface(text):
 def parse_trainers_footer(text):
     """
     Parses the Trainers footer section to extract trainer names by program number.
+    Stops parsing when "Owners:" is encountered.
     
     Returns:
         dict: Mapping of program number (str) to trainer name (str)
     """
     trainer_map = {}
-    match = re.search(r'Trainers:\s*(.*)', text, re.IGNORECASE)
+    # Capture text between "Trainers:" and "Owners:"
+    # Use non-greedy match .*? and lookahead for Owners: or end of string
+    match = re.search(r'Trainers:\s*(.*?)(?=\s*Owners:|$)', text, re.IGNORECASE | re.DOTALL)
     if match:
-        content = match.group(1)
-        entries = re.split(r'[;\n]', content)
+        content = match.group(1).replace('\n', ' ') # Handle multi-line entries
+        entries = re.split(r'[;]', content) # Split by semicolon
         for entry in entries:
             entry = entry.strip()
             if not entry:
                 continue
-            m = re.match(r'(\d+)\s*-\s*(.*)', entry)
+            # Look for "PGM - Name"
+            # Regex: Start with digits (and optional letters), then hyphen, then rest.
+            m = re.match(r'(\d+[A-Za-z]*)\s*-\s*(.*)', entry)
             if m:
                 pgm = m.group(1)
                 trainer = m.group(2).strip()
                 if trainer.endswith('.'):
                     trainer = trainer[:-1]
+                
+                # Format name: Ensure space after comma if missing
+                if ',' in trainer and ', ' not in trainer:
+                    trainer = trainer.replace(',', ', ')
+                
+                # Handle CamelCase in trainer name (e.g. BarreraIII -> Barrera III)
+                # Also "Bond, H.James" -> "Bond, H. James"
+                
+                # CamelCase split
+                trainer_orig = trainer
+                
+                # Avoid splitting DeXxxx, McXxxx, MacXxxx, O'Xxxx
+                # Use negative lookbehind?
+                # (?<!\bDe)(?<!\bMc)(?<!\bMac)(?<!\bO')(?<=[a-z])(?=[A-Z])
+                # But "De" might be start of string.
+                # Let's try a simpler approach: Split, then fix if it was De/Mc/Mac.
+                
+                trainer = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', trainer)
+                
+                # Fix De Lauro -> DeLauro, Mc Cormack -> McCormack, etc.
+                trainer = re.sub(r'\b(De|Mc|Mac|O)\s+([A-Z])', r'\1\2', trainer)
+                
+                # Space after period if followed by uppercase
+                trainer = re.sub(r'\.(?=[A-Z])', '. ', trainer)
+                    
                 trainer_map[pgm] = trainer
     return trainer_map
+
+
+def extract_jockey_and_horse(text):
+    """
+    Extracts Horse Name and Jockey from a string like "HorseName(Jockey)".
+    Handles nested parens and multiple paren groups by finding the last balanced group.
+    
+    Returns:
+        tuple: (HorseName, Jockey) or (None, None)
+    """
+    if not text.endswith(')'):
+        return None, None
+        
+    # Find the matching opening parenthesis for the last closing parenthesis
+    balance = 0
+    open_idx = -1
+    for i in range(len(text) - 1, -1, -1):
+        char = text[i]
+        if char == ')':
+            balance += 1
+        elif char == '(':
+            balance -= 1
+            if balance == 0:
+                open_idx = i
+                break
+    
+    if open_idx != -1:
+        jockey = text[open_idx+1:-1].strip()
+        horse = text[:open_idx].strip()
+        
+        # Format jockey name: Ensure space after comma if missing
+        if ',' in jockey and ', ' not in jockey:
+            jockey = jockey.replace(',', ', ')
+            
+        # Handle CamelCase in jockey name (e.g. RodriguezCastro -> Rodriguez Castro)
+        jockey = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', jockey)
+        
+        # Ensure space before '(' if missing
+        if '(' in jockey and ' (' not in jockey:
+            jockey = jockey.replace('(', ' (')
+            
+        return horse, jockey
+        
+    return None, None
 
 
 def parse_horse_row(line):
@@ -101,69 +175,72 @@ def parse_horse_row(line):
     line = line.strip()
     if not line:
         return None
+        
+    # Filter out wager lines
+    if line.startswith('$') or "Pick" in line or "Double" in line or "Exacta" in line:
+        return None
     
     parts = line.split()
     if not parts:
         return None
     
-    # Find PGM: First token that is all digits
+    # Find PGM: First token that looks like a PGM (digits, optionally followed by letters)
+    # e.g. "1", "1A", "10"
     pgm = None
-    for part in parts:
-        if part.isdigit():
-            pgm = part
-            break
+    pgm_idx = -1
+    for i, part in enumerate(parts):
+        # Allow 1A, 2B etc. Must start with digit.
+        # Exclude purely alpha tokens or tokens with other chars (like dates 4Dec22)
+        # Dates usually have 3 alpha chars in middle.
+        # PGM is usually short (1-3 chars).
+        if part[0].isdigit():
+            # Check if it's a date-like string (e.g. 18Dec22)
+            if re.search(r'\d+[A-Za-z]{3}\d+', part):
+                continue
+            # Check if it's a PGM (digits + optional suffix)
+            if re.match(r'^\d+[A-Za-z]*$', part):
+                pgm = part
+                pgm_idx = i
+                break
     
     if not pgm:
         return None
-    
-    # Check for Jockey in parens
-    if "(" not in line or ")" not in line:
-        return None
-    
-    # Extract Horse and Jockey
-    paren_match = re.search(r'([^\s]+)\((.*?)\)', line)
-    if not paren_match:
-        paren_match = re.search(r'([^\s]+)\s+\((.*?)\)', line)
-    
-    if not paren_match:
-        return None
         
-    jockey = paren_match.group(2)
-    
-    # Verify it's a data row by checking for Odds (decimal)
-    has_odds = False
-    for part in parts:
-        if "." in part and part.replace('.', '').replace('*', '').isdigit():
-            has_odds = True
-            break
-    
-    if has_odds:
-        return {"pgm": pgm, "jockey": jockey}
-    
+    # Safer: Look for the token immediately following PGM?
+    # If PGM is index 0, check index 1.
+    if len(parts) > pgm_idx + 1:
+        candidate = parts[pgm_idx + 1]
+        if '(' in candidate and ')' in candidate:
+            horse, jockey = extract_jockey_and_horse(candidate)
+            if horse and jockey and ',' in jockey:
+                return {"pgm": pgm, "jockey": jockey}
+                
+    # Fallback: Scan all tokens for one that looks like Horse(Jockey)
+    for part in parts[pgm_idx+1:]:
+        if '(' in part and part.endswith(')'):
+             horse, jockey = extract_jockey_and_horse(part)
+             if horse and jockey and ',' in jockey:
+                 return {"pgm": pgm, "jockey": jockey}
+
     return None
 
 
 def format_date(date_str):
     """
-    Formats date string from PDF format to YYYY-MM-DD format.
+    Formats date string from PDF format to readable format.
     Handles dates with or without spaces (e.g., "January 1, 2025" or "January1,2023").
     
     Args:
         date_str: Date string from PDF (e.g., "January 1, 2025" or "January1,2023")
         
     Returns:
-        str: Formatted date string (YYYY-MM-DD) or original if parsing fails
+        str: Formatted date string or original if parsing fails
     """
-    try:
-        # Normalize date string by adding spaces if missing
-        # Pattern: "January1,2023" -> "January 1, 2023"
-        normalized = re.sub(r'([a-zA-Z]+)(\d+)', r'\1 \2', date_str)  # Add space between month and day
-        normalized = re.sub(r'(\d+),(\d+)', r'\1, \2', normalized)  # Add space after comma
-        
-        date_obj = datetime.datetime.strptime(normalized, DATE_FORMAT_INPUT)
-        return date_obj.strftime(DATE_FORMAT_OUTPUT)
-    except ValueError:
-        return date_str  # Keep original if parsing fails
+    # Normalize date string by adding spaces if missing
+    # Pattern: "January1,2023" -> "January 1, 2023"
+    normalized = re.sub(r'([a-zA-Z]+)(\d+)', r'\1 \2', date_str)  # Add space between month and day
+    normalized = re.sub(r'(\d+),(\d+)', r'\1, \2', normalized)  # Add space after comma
+    return normalized
 
 
 # Main extraction function
