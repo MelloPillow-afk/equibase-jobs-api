@@ -305,7 +305,7 @@ def extract_race_data(pdf_path):
 def save_to_csv(data, output_path):
     """
     Saves race data to a CSV file.
-    
+
     Args:
         data: List of dictionaries containing race data
         output_path: Path to output CSV file
@@ -314,7 +314,6 @@ def save_to_csv(data, output_path):
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES, quoting=csv.QUOTE_NONNUMERIC)
         writer.writeheader()
         writer.writerows(data)
-
 
 # Main execution
 if __name__ == "__main__":
@@ -330,4 +329,3 @@ if __name__ == "__main__":
     data = extract_race_data(pdf_path)
     save_to_csv(data, output_path)
     print(f"Extracted {len(data)} rows to {output_path}")
-
