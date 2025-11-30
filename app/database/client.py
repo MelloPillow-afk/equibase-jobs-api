@@ -11,6 +11,7 @@ client = create_client(url, key)
 # Global reference
 supabase_client: AsyncClient | None = None
 
+
 async def init_supabase():
     """Initialize Supabase client on app startup"""
     global supabase_client

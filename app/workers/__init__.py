@@ -10,7 +10,7 @@ celery_app = Celery(
     "horse_race_workers",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
-    include=["app.workers.pdf_processor"]
+    include=["app.workers.pdf_processor"],
 )
 
 # Celery configuration
@@ -28,6 +28,7 @@ celery_app.conf.update(
 
 def async_celery_task(*celery_args, **celery_kwargs):
     """Decorator that makes async functions work as Celery tasks"""
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             return asyncio.run(func(*args, **kwargs))

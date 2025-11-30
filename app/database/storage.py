@@ -6,6 +6,7 @@ from app.database.client import database_session
 BUCKET_NAME = "horse-racing-files"
 EXPIRATION_TIME = 60 * 60 * 24 * 3  # 3 days
 
+
 async def upload_pdf(file_path: str, file_data: bytes) -> str:
     """
     Upload a PDF file to Supabase Storage.
@@ -19,13 +20,13 @@ async def upload_pdf(file_path: str, file_data: bytes) -> str:
     """
     async with database_session() as supabase:
         response = await supabase.storage.from_(BUCKET_NAME).upload(
-            path=file_path,
-            file=file_data,
-            file_options={"content-type": "application/pdf"}
+            path=file_path, file=file_data, file_options={"content-type": "application/pdf"}
         )
 
         # Get public URL for the uploaded file
-        public_url = supabase.storage.from_(BUCKET_NAME).create_signed_url(file_path, EXPIRATION_TIME)
+        public_url = supabase.storage.from_(BUCKET_NAME).create_signed_url(
+            file_path, EXPIRATION_TIME
+        )
         return public_url
 
 
@@ -58,13 +59,13 @@ async def upload_csv(file_path: str, file_data: bytes) -> str:
     """
     async with database_session() as supabase:
         response = await supabase.storage.from_(BUCKET_NAME).upload(
-            path=file_path,
-            file=file_data,
-            file_options={"content-type": "text/csv"}
+            path=file_path, file=file_data, file_options={"content-type": "text/csv"}
         )
 
         # Get public URL for the uploaded file
-        public_url = await supabase.storage.from_(BUCKET_NAME).create_signed_url(file_path, EXPIRATION_TIME)
+        public_url = await supabase.storage.from_(BUCKET_NAME).create_signed_url(
+            file_path, EXPIRATION_TIME
+        )
         return public_url["signedURL"]
 
 

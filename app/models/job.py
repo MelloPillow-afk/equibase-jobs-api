@@ -33,6 +33,7 @@ class JobCreate(BaseModel):
         }
     )
 
+
 class JobResponse(BaseModel):
     """Response model for a single job."""
 
@@ -42,9 +43,7 @@ class JobResponse(BaseModel):
     pdf_url: str = Field(..., description="URL to source PDF in Supabase Storage")
     download_url: Optional[str] = Field(None, description="URL to processed CSV file")
     created_at: datetime = Field(..., description="Job creation timestamp")
-    completed_at: Optional[datetime] = Field(
-        None, description="Job completion timestamp"
-    )
+    completed_at: Optional[datetime] = Field(None, description="Job completion timestamp")
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -71,9 +70,7 @@ class JobResponse(BaseModel):
     pdf_url: str = Field(..., description="URL to source PDF in Supabase Storage")
     file_download_url: Optional[str] = Field(None, description="URL to processed CSV file")
     created_at: datetime = Field(..., description="Job creation timestamp")
-    completed_at: Optional[datetime] = Field(
-        None, description="Job completion timestamp"
-    )
+    completed_at: Optional[datetime] = Field(None, description="Job completion timestamp")
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -95,9 +92,7 @@ class JobListQueryParams(BaseModel):
     """Query parameters for GET /jobs endpoint."""
 
     page: int = Field(default=1, ge=1, description="Page number (1-indexed)")
-    limit: int = Field(
-        default=20, ge=1, le=50, description="Number of items per page (max 50)"
-    )
+    limit: int = Field(default=20, ge=1, le=50, description="Number of items per page (max 50)")
 
     model_config = ConfigDict(
         json_schema_extra={
