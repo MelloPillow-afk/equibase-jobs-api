@@ -1,15 +1,12 @@
 """Application configuration using Pydantic settings."""
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+import os
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
-
-    # Supabase Configuration
-    SUPABASE_URL: str = ""
-    SUPABASE_KEY: str = ""
-
+    SUPABASE_URL: str = os.environ.get("SUPABASE_URL")
+    SUPABASE_KEY: str = os.environ.get("SUPABASE_KEY")
     # Celery Configuration
     CELERY_BROKER_URL: str = "redis://localhost:6379/0"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
