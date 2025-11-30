@@ -1,100 +1,78 @@
-# FastAPI Scaffold with Background Processing
+# Horse Race API
 
-A production-ready FastAPI scaffold for building applications with asynchronous background job processing, file storage, and real-time status polling.
+A FastAPI service that processes horse racing PDFs and converts them to CSV format using background job processing.
 
-## Architecture Overview
+## Description
 
-### Tech Stack
+This API accepts PDF uploads, processes them asynchronously, and returns downloadable CSV files. Users can track job progress through real-time status polling.
+
+## Stack Overview
 
 - **Backend**: FastAPI + Uvicorn
-- **Database**: Supabase Postgres
-- **Storage**: Supabase Storage
-- **Background Tasks**: Celery (async job processing)
+- **Database**: Supabase Postgres (job records)
+- **Storage**: Supabase Storage (PDFs + CSVs)
+- **Background Processing**: Celery + Redis
 - **Package Management**: uv
+- **Deployment**: Render
 
-## Project Structure
-
-```
-.
-├── app/
-│   ├── __init__.py
-│   ├── main.py              # FastAPI app entry point
-│   ├── config.py            # Environment variables & settings
-│   ├── routes.py            # API route registration
-│   ├── models/              # Pydantic models for validation
-│   │   └── __init__.py
-│   ├── handlers/            # API endpoint handlers (business logic)
-│   │   ├── __init__.py
-│   │   ├── health.py        # Health check endpoint
-│   │   └── jobs.py          # Job CRUD endpoints
-│   ├── database/            # Database & storage operations
-│   │   └── __init__.py
-│   └── workers/             # Celery background tasks
-│       └── __init__.py
-├── tests/
-│   ├── __init__.py
-│   ├── factories/           # Test data factories
-│   │   └── __init__.py
-│   └── integration/         # Integration tests
-│       └── __init__.py
-├── .env.example             # Environment variable template
-├── pyproject.toml           # Project dependencies
-├── uv.lock                  # Locked dependencies
-├── Makefile                 # Common development commands
-└── README.md
-```
-
-## Setup
+## How to Run
 
 ### Prerequisites
 
 - Python 3.13+
 - [uv](https://github.com/astral-sh/uv) package manager
-- Supabase account (for database & storage)
+- Redis (for Celery)
+- Supabase account
 
-### Installation
+### Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd <repo-name>
-   ```
-
-2. **Install dependencies**
+1. **Install dependencies**
    ```bash
    uv sync
    ```
 
-### Running the Application
+2. **Configure environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Supabase credentials
+   ```
 
-#### Development Mode
+3. **Start Redis** (if running locally)
+   ```bash
+   redis-server
+   ```
 
-Start the FastAPI server:
-```bash
-uv run uvicorn app.main:app --reload
-```
+4. **Run the API server**
+   ```bash
+   uv run uvicorn app.main:app --reload
+   ```
 
-Start the Celery worker (in a separate terminal):
-```bash
-uv run celery -A app.workers worker --loglevel=info
-```
+5. **Run the Celery worker** (in a separate terminal)
+   ```bash
+   uv run celery -A app.workers worker --loglevel=info
+   ```
 
-Access the API documentation at: `http://localhost:8000/docs`
-
-#### Using Make Commands
-
-```bash
-make install    # Install dependencies
-make dev        # Run development server
-make worker     # Run Celery worker
-make test       # Run tests
-```
+6. **Access the API**
+   - API docs: http://localhost:8000/docs
+   - Health check: http://localhost:8000/health
 
 ## API Endpoints
 
-### Health Check
 ```
-GET /health
-Returns: { "status": "healthy" }
+POST   /jobs              Create new job & start processing
+GET    /jobs              List all jobs (paginated)
+GET    /jobs/{job_id}     Get job status & download URL
+DELETE /jobs/{job_id}     Delete job & associated files
 ```
 
+## Architecture Flow
+
+```
+1. Frontend uploads PDF to Supabase Storage
+2. Frontend calls POST /jobs with PDF path
+3. API creates job record (status="processing")
+4. Celery worker downloads PDF, processes it, uploads CSV
+5. Worker updates job status to "completed"
+6. Frontend polls GET /jobs/{job_id} for status
+7. User downloads CSV from Supabase Storage
+```
