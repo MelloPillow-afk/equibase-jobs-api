@@ -1,7 +1,7 @@
 from datetime import datetime
 from app.database.client import database_session
 
-async def get_jobs(limit: int = 20, page: int = 1):
+async def get_jobs(limit: int = 50, page: int = 1):
     async with database_session() as supabase:
         response = (
             await supabase.from_("polling_jobs")

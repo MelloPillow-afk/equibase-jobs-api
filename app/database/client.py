@@ -9,7 +9,6 @@ url: str = settings.SUPABASE_URL
 # Global reference
 supabase_client: AsyncClient | None = None
 
-
 async def init_supabase():
     """Initialize Supabase client on app startup"""
     global supabase_client

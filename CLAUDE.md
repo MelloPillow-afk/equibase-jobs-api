@@ -50,7 +50,7 @@ When status changes to "completed"/"failed":
 
 ```
 	Job Table:
-	- id (uuid, primary key)
+	- id (8-byte integer, primary key)
 	- title (text)
 	- status (text: "processing" | "completed" | "failed")
 	- download_url (text, nullable)
@@ -62,8 +62,8 @@ When status changes to "completed"/"failed":
 
 ```
 POST /jobs
-Body: { pdf_path: string }
-Returns: { job_id: string }
+Body: { title: string, pdf_path: string }
+Returns: Job
 Creates job, starts background processing
 
 GET /jobs
@@ -122,13 +122,10 @@ celery
 
 ### Phase 1: Project Scaffold [✅]
 
-### Phase 2: Database Layer
-- [x] Create app/database/client.py (Supabase client singleton)
-- [x] Create app/database/jobs.py (insert_job, get_job_by_id, update_job_status, list_jobs, delete_job)
-- [ ] Create app/database/storage.py (upload_pdf, download_pdf, upload_csv, delete_file)
+### Phase 2: Database Layer [✅]
 
-### Phase 3: Models & Validation
-- [ ] Create app/models/job.py (JobCreate, JobResponse, JobListResponse, JobStatus enum)
+### Phase 3: Models & Validation [✅]
+- [✅] Create app/models/job.py (JobCreate, JobResponse, JobListResponse, JobStatus enum)
 
 ### Phase 4: API Endpoints
 - [ ] Implement POST /jobs handler (create job, trigger background task)
