@@ -18,17 +18,17 @@ class JobCreate(BaseModel):
     """Request model for creating a new job."""
 
     title: str = Field(..., min_length=1, max_length=255, description="Job title")
-    pdf_path: str = Field(
+    pdf_url: str = Field(
         ...,
         min_length=1,
-        description="Path to PDF file in Supabase Storage",
+        description="URL to PDF file in Supabase Storage",
     )
 
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "title": "Process Q4 Financial Report",
-                "pdf_path": "uploads/financial-report-q4.pdf",
+                "pdf_url": "https://supabase.co/storage/uploads/financial-report-q4.pdf",
             }
         }
     )
@@ -69,7 +69,7 @@ class JobResponse(BaseModel):
     title: str = Field(..., description="Job title")
     status: JobStatus = Field(..., description="Current job status")
     pdf_url: str = Field(..., description="URL to source PDF in Supabase Storage")
-    download_url: Optional[str] = Field(None, description="URL to processed CSV file")
+    file_download_url: Optional[str] = Field(None, description="URL to processed CSV file")
     created_at: datetime = Field(..., description="Job creation timestamp")
     completed_at: Optional[datetime] = Field(
         None, description="Job completion timestamp"

@@ -1,5 +1,6 @@
 """Supabase Storage operations for PDFs and CSVs."""
 
+import httpx
 from app.database.client import database_session
 
 BUCKET_NAME = "horse-racing-files"
@@ -28,19 +29,20 @@ async def upload_pdf(file_path: str, file_data: bytes) -> str:
         return public_url
 
 
-async def download_pdf(file_path: str) -> bytes:
+async def download_pdf(pdf_url: str) -> bytes:
     """
-    Download a PDF file from Supabase Storage.
+    Download a PDF file from a URL (typically Supabase Storage signed URL).
 
     Args:
-        file_path: Path to the file in the bucket (e.g., "pdfs/race-123.pdf")
+        pdf_url: Complete URL to the PDF file (e.g., signed URL from Supabase Storage)
 
     Returns:
         bytes: Binary content of the PDF file
     """
-    async with database_session() as supabase:
-        response = await supabase.storage.from_(BUCKET_NAME).download(file_path)
-        return response
+    async with httpx.AsyncClient() as client:
+        response = await client.get(pdf_url)
+        response.raise_for_status()
+        return response.content
 
 
 async def upload_csv(file_path: str, file_data: bytes) -> str:

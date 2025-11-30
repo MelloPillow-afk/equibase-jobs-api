@@ -24,9 +24,12 @@ async def create_job(request_body: JobCreate) -> JobResponse:
     Returns:
         JobResponse: Created job details
     """
-    pdf_path = request_body.pdf_path
+    pdf_url = request_body.pdf_url
     title = request_body.title
-    job = await jobs_db.create_job(pdf_path, title)
+    job = await jobs_db.create_job(title=title, pdf_url=pdf_url)
+    
+    if not job:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create job")
 
     # TODO: Start background processing
     return JobResponse(**job)

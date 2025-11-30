@@ -53,6 +53,7 @@ When status changes to "completed"/"failed":
 	- id (8-byte integer, primary key)
 	- title (text)
 	- status (text: "processing" | "completed" | "failed")
+   - pdf_path (text)
 	- download_url (text, nullable)
 	- created_at (timestamp)
 	- completed_at (timestamp, nullable)
@@ -95,7 +96,12 @@ horse-race/
 ├── tests/
 │   ├── factories/
 │   ├── integration/
-├── requirements.txt
+├── pyproject.toml
+├── Makefile
+├── README.md
+├── .envrc
+├── .env
+├── .gitignore
 └── .env.example
 
 ```
@@ -121,18 +127,9 @@ celery
 ## Implementation Checklist
 
 ### Phase 1: Project Scaffold [✅]
-
 ### Phase 2: Database Layer [✅]
-
-### Phase 3: Models & Validation [✅]
-- [✅] Create app/models/job.py (JobCreate, JobResponse, JobListResponse, JobStatus enum)
-
-### Phase 4: API Endpoints
-- [ ] Implement POST /jobs handler (create job, trigger background task)
-- [ ] Implement GET /jobs handler (paginated list with ?page=1&limit=20)
-- [ ] Implement GET /jobs/{job_id} handler (single job status)
-- [ ] Implement DELETE /jobs/{job_id} handler (cleanup job + files)
-- [ ] Add CORS middleware for React frontend
+### Phase 3: Models & Validation [✅] 
+### Phase 4: API Endpoints [✅]
 
 ### Phase 5: Background Workers
 - [ ] Setup Celery configuration (broker, backend)
