@@ -1,4 +1,5 @@
 """FastAPI application entry point."""
+
 import app.database.client as db
 
 from contextlib import asynccontextmanager
@@ -14,6 +15,7 @@ async def lifespan(app: FastAPI):
     await db.init_supabase()
     yield
     await db.close_supabase()
+
 
 app = FastAPI(
     title="Horse Race API",

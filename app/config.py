@@ -3,8 +3,10 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
 
+
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
+
     SUPABASE_URL: str = os.environ.get("SUPABASE_URL")
     SUPABASE_KEY: str = os.environ.get("SUPABASE_KEY")
     # Celery Configuration

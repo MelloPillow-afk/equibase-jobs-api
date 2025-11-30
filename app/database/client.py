@@ -9,10 +9,12 @@ url: str = settings.SUPABASE_URL
 # Global reference
 supabase_client: AsyncClient | None = None
 
+
 async def init_supabase():
     """Initialize Supabase client on app startup"""
     global supabase_client
     supabase_client = await acreate_client(url, key)
+
 
 async def close_supabase():
     """Close Supabase client on app shutdown"""
@@ -20,6 +22,7 @@ async def close_supabase():
     if supabase_client:
         await supabase_client.close()
         supabase_client = None
+
 
 @asynccontextmanager
 async def database_session():
