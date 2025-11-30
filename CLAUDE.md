@@ -123,8 +123,8 @@ celery
 ### Phase 1: Project Scaffold [✅]
 
 ### Phase 2: Database Layer
-- [ ] Create app/database/client.py (Supabase client singleton)
-- [ ] Create app/database/jobs.py (insert_job, get_job_by_id, update_job_status, list_jobs, delete_job)
+- [x] Create app/database/client.py (Supabase client singleton)
+- [x] Create app/database/jobs.py (insert_job, get_job_by_id, update_job_status, list_jobs, delete_job)
 - [ ] Create app/database/storage.py (upload_pdf, download_pdf, upload_csv, delete_file)
 
 ### Phase 3: Models & Validation
