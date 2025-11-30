@@ -3,6 +3,7 @@ services:
     name: celery-worker
     region: ohio
     runtime: python
+    plan: free
     buildCommand: "pip install -r requirements.txt"
     startCommand: "celery -A app.workers worker --loglevel info --concurrency 4"
     autoDeploy: false
@@ -28,6 +29,7 @@ services:
     name: app
     region: ohio
     runtime: python
+    plan: free
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     autoDeploy: false
@@ -76,6 +78,6 @@ services:
   - type: redis
     name: celery-redis
     region: ohio
-    plan: starter # we choose a plan with persistence to ensure tasks are not lost upon restart
+    plan: free 
     maxmemoryPolicy: noeviction # recommended policy for queues
     ipAllowList: [] # only allow internal connections
