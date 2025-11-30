@@ -26,7 +26,7 @@ async def create_job(pdf_url: str, title: str):
             .insert({"pdf_url": pdf_url, "status": "processing", "title": title})
             .execute()
         )
-        return response.data
+        return response.data[0]
 
 
 async def update_job(job_id: int, status: str, download_url: str, completed_at: datetime):
@@ -41,6 +41,7 @@ async def update_job(job_id: int, status: str, download_url: str, completed_at: 
     async with database_session() as supabase:
         response = await supabase.from_("polling_jobs").update(updates).eq("id", job_id).execute()
         return response.data
+
 
 async def delete_job(job_id: int):
     async with database_session() as supabase:

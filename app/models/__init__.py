@@ -3,7 +3,7 @@
 from app.models.job import (
     JobCreate,
     JobResponse,
-    JobListParams,
+    JobListQueryParams,
     JobListResponse,
     JobStatus,
 )
@@ -11,7 +11,7 @@ from app.models.job import (
 __all__ = [
     "JobCreate",
     "JobResponse",
-    "JobListParams",
+    "JobListQueryParams",
     "JobListResponse",
     "JobStatus",
 ]

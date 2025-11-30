@@ -1,10 +1,12 @@
 from contextlib import asynccontextmanager
 
-from supabase import acreate_client, AsyncClient
+from supabase import acreate_client, AsyncClient, create_client
 from app.config import settings
 
-key: str = settings.SUPABASE_KEY
 url: str = settings.SUPABASE_URL
+key: str = settings.SUPABASE_KEY
+
+client = create_client(url, key)
 
 # Global reference
 supabase_client: AsyncClient | None = None

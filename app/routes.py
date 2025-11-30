@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 
-from app.handlers import health
+from app.handlers import health, jobs
 
 router = APIRouter()
 
-router.add_api_route(path="/health", endpoint=health.health_check, methods=["GET"])
+# Include routers from handlers
+router.include_router(health.router)
+router.include_router(jobs.router)
