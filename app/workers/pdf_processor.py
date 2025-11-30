@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 
 import pdfplumber
 
+import app.database.client as db_client
 from app.database.jobs import get_job, update_job
 from app.database.storage import download_pdf, upload_csv
 from app.workers import async_celery_task
@@ -345,7 +346,9 @@ async def process_pdf(self, job_id: int):
     Args:
         job_id: ID of the job to process
     """
+
     logger.info(f"Starting PDF processing for job {job_id}")
+    await db_client.init_supabase()
 
     try:
         # Get job details
@@ -392,3 +395,5 @@ async def process_pdf(self, job_id: int):
 
         # Re-raise the exception so Celery knows the task failed
         raise
+    finally:
+        await db_client.close_supabase()

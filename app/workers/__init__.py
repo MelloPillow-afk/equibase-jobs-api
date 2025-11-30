@@ -3,10 +3,8 @@
 import asyncio
 
 from celery import Celery
-from celery.signals import worker_process_init, worker_process_shutdown
 
 from app.config import settings
-from app.database.client import close_supabase, init_supabase
 
 celery_app = Celery(
     "horse_race_workers",
@@ -39,16 +37,3 @@ def async_celery_task(*celery_args, **celery_kwargs):
         return celery_app.task(*celery_args, **celery_kwargs)(wrapper)
 
     return decorator
-
-
-# Worker lifecycle hooks
-@worker_process_init.connect
-def init_worker(**kwargs):
-    """Initialize resources when worker process starts."""
-    asyncio.run(init_supabase())
-
-
-@worker_process_shutdown.connect
-def shutdown_worker(**kwargs):
-    """Clean up resources when worker process shuts down."""
-    asyncio.run(close_supabase())
