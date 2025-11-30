@@ -4,7 +4,7 @@ from app.database.client import database_session
 async def get_jobs(limit: int = 50, page: int = 1):
     async with database_session() as supabase:
         response = (
-            await supabase.from_("jobs")
+            await supabase.table("jobs")
             .select("*")
             .limit(limit + 1)
             .offset((page - 1) * limit)
@@ -17,7 +17,7 @@ async def get_jobs(limit: int = 50, page: int = 1):
 
 async def get_job(job_id: int):
     async with database_session() as supabase:
-        response = await supabase.from_("jobs").select("*").eq("id", job_id).execute()
+        response = await supabase.table("jobs").select("*").eq("id", job_id).execute()
         if response.data and len(response.data) > 0:
             return response.data[0]
         return None
@@ -26,7 +26,7 @@ async def get_job(job_id: int):
 async def create_job(title: str, pdf_url: str):
     async with database_session() as supabase:
         response = (
-            await supabase.from_("jobs")
+            await supabase.table("jobs")
             .insert({"pdf_url": pdf_url, "status": "processing", "title": title})
             .execute()
         )
@@ -42,10 +42,12 @@ async def update_job(job_id: int, status: str, download_url: str, completed_at: 
     if download_url:
         updates["file_download_url"] = download_url
     if completed_at:
-        updates["completed_at"] = completed_at
+        # Convert datetime to ISO format string for JSON serialization
+        updates["completed_at"] = completed_at.isoformat()
 
     async with database_session() as supabase:
-        response = await supabase.from_("jobs").update(updates).eq("id", job_id).execute()
+        # Pass the dictionary directly - Supabase client handles JSON serialization
+        response = await supabase.table("jobs").update(updates).eq("id", job_id).execute()
         if response.data and len(response.data) > 0:
             return response.data[0]
         return None
@@ -53,7 +55,7 @@ async def update_job(job_id: int, status: str, download_url: str, completed_at: 
 
 async def delete_job(job_id: int):
     async with database_session() as supabase:
-        response = await supabase.from_("jobs").delete().eq("id", job_id).execute()
+        response = await supabase.table("jobs").delete().eq("id", job_id).execute()
         if response.data and len(response.data) > 0:
             return response.data[0]
         return None

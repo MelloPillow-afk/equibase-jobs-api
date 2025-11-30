@@ -130,12 +130,7 @@ celery
 ### Phase 2: Database Layer [✅]
 ### Phase 3: Models & Validation [✅] 
 ### Phase 4: API Endpoints [✅]
-
-### Phase 5: Background Workers
-- [ ] Setup Celery configuration (broker, backend)
-- [ ] Create app/workers/pdf_processor.py (Celery task)
-- [ ] Implement PDF download → processing → CSV upload → status update flow
-- [ ] Add error handling and logging for worker tasks
+### Phase 5: Background Workers [✅]
 
 ### Phase 6: Testing
 - [ ] Create test factories in tests/factories/

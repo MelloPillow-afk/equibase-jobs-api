@@ -64,8 +64,8 @@ async def upload_csv(file_path: str, file_data: bytes) -> str:
         )
 
         # Get public URL for the uploaded file
-        public_url = supabase.storage.from_(BUCKET_NAME).create_signed_url(file_path, EXPIRATION_TIME)
-        return public_url
+        public_url = await supabase.storage.from_(BUCKET_NAME).create_signed_url(file_path, EXPIRATION_TIME)
+        return public_url["signedURL"]
 
 
 async def delete_file(file_path: str) -> None:

@@ -22,7 +22,7 @@ run:
 	python -m app.main
 
 worker:
-	celery -A app.workers.pdf_processor worker --loglevel=info
+	celery -A app.workers worker --loglevel=info
 
 test:
 	pytest

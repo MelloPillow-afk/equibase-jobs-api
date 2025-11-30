@@ -9,6 +9,7 @@ from app.models import (
     JobListQueryParams,
     JobListResponse,
 )
+from app.workers.pdf_processor import process_pdf
 
 router = APIRouter()
 
@@ -31,7 +32,7 @@ async def create_job(request_body: JobCreate) -> JobResponse:
     if not job:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create job")
 
-    # TODO: Start background processing
+    process_pdf.delay(job["id"])
     return JobResponse(**job)
 
 

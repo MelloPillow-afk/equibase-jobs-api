@@ -4,12 +4,11 @@ import csv
 import io
 import logging
 import re
-from datetime import datetime
-import asyncio
+from datetime import datetime, UTC
 
 import pdfplumber
 
-from app.workers import celery_app
+from app.workers import async_celery_task
 from app.database.storage import download_pdf, upload_csv
 from app.database.jobs import get_job, update_job
 
@@ -326,8 +325,8 @@ def process_pdf_to_csv(pdf_data: bytes) -> bytes:
     return output.getvalue().encode('utf-8')
 
 
-@celery_app.task(bind=True, name="process_pdf")
-def process_pdf(self, job_id: int):
+@async_celery_task(bind=True, name="process_pdf")
+async def process_pdf(self, job_id: int):
     """
     Celery task to process a PDF file and generate CSV output.
 
@@ -338,7 +337,7 @@ def process_pdf(self, job_id: int):
 
     try:
         # Get job details
-        job = asyncio.run(get_job(job_id))
+        job = await get_job(job_id)
 
         if not job or len(job) == 0:
             logger.error(f"Job {job_id} not found")
@@ -348,25 +347,25 @@ def process_pdf(self, job_id: int):
 
         # Step 1: Download PDF from Supabase Storage
         logger.info(f"Downloading PDF from {pdf_url}")
-        pdf_data = asyncio.run(download_pdf(pdf_url))
+        pdf_data = await download_pdf(pdf_url)
 
         # Step 2: Process PDF to CSV
         logger.info(f"Processing PDF for job {job_id}")
         csv_data = process_pdf_to_csv(pdf_data)
 
         # Step 3: Upload CSV to Supabase Storage
-        csv_filename = f"public/job-{job_id}-{datetime.timezone.utc.strftime('%Y%m%d%H%M%S')}.csv"
+        csv_filename = f"public/job-{job_id}-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}.csv"
         logger.info(f"Uploading CSV to {csv_filename}")
-        csv_url = asyncio.run(upload_csv(csv_filename, csv_data))
+        csv_url = await upload_csv(csv_filename, csv_data)
 
         # Step 4: Update job status to completed
         logger.info(f"Updating job {job_id} status to completed")
-        asyncio.run(update_job(
+        await update_job(
             job_id=job_id,
             status="completed",
             download_url=csv_url,
-            completed_at=datetime.timezone.utc
-        ))
+            completed_at=datetime.now(UTC)
+        )
 
         logger.info(f"Successfully completed processing job {job_id}")
         return {
@@ -380,12 +379,12 @@ def process_pdf(self, job_id: int):
 
         # Update job status to failed
         try:
-            asyncio.run(update_job(
+            await update_job(
                 job_id=job_id,
                 status="failed",
                 download_url=None,
-                completed_at=datetime.timezone.utc
-            ))
+                completed_at=datetime.now(UTC)
+            )
         except Exception as update_error:
             logger.error(f"Failed to update job status: {str(update_error)}")
 
