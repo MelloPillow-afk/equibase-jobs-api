@@ -1,10 +1,12 @@
 """Background workers for async task processing."""
 
 import asyncio
+
 from celery import Celery
 from celery.signals import worker_process_init, worker_process_shutdown
+
 from app.config import settings
-from app.database.client import init_supabase, close_supabase
+from app.database.client import close_supabase, init_supabase
 
 celery_app = Celery(
     "horse_race_workers",

@@ -2,9 +2,9 @@
 
 from app.models.job import (
     JobCreate,
-    JobResponse,
     JobListQueryParams,
     JobListResponse,
+    JobResponse,
     JobStatus,
 )
 

@@ -13,6 +13,7 @@ dependencies = [
     "redis==5.2.0",
     "python-dotenv==1.0.1",
     "pdfplumber>=0.11.8",
+    "flower>=2.0.1",
 ]
 
 [tool.pytest.ini_options]
@@ -29,6 +30,7 @@ exclude = [
     "extract_races.py",
     "test_extract_races.py",
     "test_comparison.py",
+    "app/models/",
     "data/",
     "outputs/",
     "__pycache__/",

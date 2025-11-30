@@ -1,6 +1,7 @@
 """Supabase Storage operations for PDFs and CSVs."""
 
 import httpx
+
 from app.database.client import database_session
 
 BUCKET_NAME = "horse-racing-files"
@@ -19,7 +20,7 @@ async def upload_pdf(file_path: str, file_data: bytes) -> str:
         str: Public URL of the uploaded file
     """
     async with database_session() as supabase:
-        response = await supabase.storage.from_(BUCKET_NAME).upload(
+        await supabase.storage.from_(BUCKET_NAME).upload(
             path=file_path, file=file_data, file_options={"content-type": "application/pdf"}
         )
 
@@ -58,7 +59,7 @@ async def upload_csv(file_path: str, file_data: bytes) -> str:
         str: Public URL of the uploaded file
     """
     async with database_session() as supabase:
-        response = await supabase.storage.from_(BUCKET_NAME).upload(
+        await supabase.storage.from_(BUCKET_NAME).upload(
             path=file_path, file=file_data, file_options={"content-type": "text/csv"}
         )
 

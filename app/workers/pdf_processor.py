@@ -4,13 +4,13 @@ import csv
 import io
 import logging
 import re
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 import pdfplumber
 
-from app.workers import async_celery_task
-from app.database.storage import download_pdf, upload_csv
 from app.database.jobs import get_job, update_job
+from app.database.storage import download_pdf, upload_csv
+from app.workers import async_celery_task
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ def parse_trainers_footer(text):
                 # Also "Bond, H.James" -> "Bond, H. James"
 
                 # CamelCase split
-                trainer_orig = trainer
+                # trainer_orig = trainer
 
                 # Avoid splitting DeXxxx, McXxxx, MacXxxx, O'Xxxx
                 # Use negative lookbehind?

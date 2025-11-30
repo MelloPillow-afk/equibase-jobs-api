@@ -2,8 +2,8 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional
-from pydantic import BaseModel, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class JobStatus(str, Enum):
@@ -41,9 +41,9 @@ class JobResponse(BaseModel):
     title: str = Field(..., description="Job title")
     status: JobStatus = Field(..., description="Current job status")
     pdf_url: str = Field(..., description="URL to source PDF in Supabase Storage")
-    download_url: Optional[str] = Field(None, description="URL to processed CSV file")
+    download_url: str | None = Field(None, description="URL to processed CSV file")
     created_at: datetime = Field(..., description="Job creation timestamp")
-    completed_at: Optional[datetime] = Field(None, description="Job completion timestamp")
+    completed_at: datetime | None = Field(None, description="Job completion timestamp")
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -68,9 +68,9 @@ class JobResponse(BaseModel):
     title: str = Field(..., description="Job title")
     status: JobStatus = Field(..., description="Current job status")
     pdf_url: str = Field(..., description="URL to source PDF in Supabase Storage")
-    file_download_url: Optional[str] = Field(None, description="URL to processed CSV file")
+    file_download_url: str | None = Field(None, description="URL to processed CSV file")
     created_at: datetime = Field(..., description="Job creation timestamp")
-    completed_at: Optional[datetime] = Field(None, description="Job completion timestamp")
+    completed_at: datetime | None = Field(None, description="Job completion timestamp")
 
     model_config = ConfigDict(
         from_attributes=True,

@@ -1,7 +1,8 @@
 """Application configuration using Pydantic settings."""
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class BaseConfig(BaseSettings):

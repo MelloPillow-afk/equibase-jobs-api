@@ -21,6 +21,10 @@ dev:
 run:
 	python -m app.main
 
+compile:
+	uv sync
+	uv pip compile pyproject.toml -o requirements.txt
+
 worker:
 	celery -A app.workers worker --loglevel=info
 

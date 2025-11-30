@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.database import jobs as jobs_db
 from app.models import (
     JobCreate,
-    JobResponse,
     JobListQueryParams,
     JobListResponse,
+    JobResponse,
 )
 from app.workers.pdf_processor import process_pdf
 

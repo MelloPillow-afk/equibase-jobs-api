@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
-from supabase import acreate_client, AsyncClient, create_client
+from supabase import AsyncClient, acreate_client, create_client
+
 from app.config import settings
 
 url: str = settings.SUPABASE_URL
