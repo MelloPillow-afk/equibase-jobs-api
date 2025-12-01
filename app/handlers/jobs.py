@@ -1,5 +1,6 @@
 """Job endpoint handlers."""
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.database import jobs as jobs_db
@@ -9,8 +10,10 @@ from app.models import (
     JobListResponse,
     JobResponse,
 )
+from app.workers import celery_app
 from app.workers.pdf_processor import process_pdf
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -34,7 +37,13 @@ async def create_job(request_body: JobCreate) -> JobResponse:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create job"
         )
 
-    process_pdf.delay(job["id"])
+    worker = process_pdf.delay(job["id"])
+
+    try:
+        job = await jobs_db.update_job(job["id"], worker_id=worker.id)
+    except Exception as e:
+        logger.error(f"Failed to update job with worker ID {worker.id}: {e}")
+
     return JobResponse(**job)
 
 
@@ -85,5 +94,7 @@ async def delete_job(job_id: int) -> None:
     Returns:
         None: 204 No Content on success
     """
-    await jobs_db.delete_job(job_id)
+    job = await jobs_db.delete_job(job_id)
+    if job and job.get("worker_id"):
+        celery_app.control.revoke(job["worker_id"], terminate=True)
     return None

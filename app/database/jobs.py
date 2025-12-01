@@ -37,7 +37,7 @@ async def create_job(title: str, pdf_url: str):
         return None
 
 
-async def update_job(job_id: int, status: str, download_url: str, completed_at: datetime):
+async def update_job(job_id: int, status: str, download_url: str, completed_at: datetime, worker_id: str):
     updates = {}
     if status:
         updates["status"] = status
@@ -46,6 +46,8 @@ async def update_job(job_id: int, status: str, download_url: str, completed_at: 
     if completed_at:
         # Convert datetime to ISO format string for JSON serialization
         updates["completed_at"] = completed_at.isoformat()
+    if worker_id:
+        updates["worker_id"] = worker_id
 
     async with database_session() as supabase:
         # Pass the dictionary directly - Supabase client handles JSON serialization
