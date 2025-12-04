@@ -16,15 +16,8 @@ supabase_client: AsyncClient | None = None
 async def init_supabase():
     """Initialize Supabase client on app startup"""
     global supabase_client
-    supabase_client = await acreate_client(url, key)
-
-
-async def close_supabase():
-    """Close Supabase client on app shutdown"""
-    global supabase_client
-    if supabase_client:
-        await supabase_client.close()
-        supabase_client = None
+    if supabase_client is None:
+        supabase_client = await acreate_client(url, key)
 
 
 @asynccontextmanager

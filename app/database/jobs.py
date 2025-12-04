@@ -37,7 +37,14 @@ async def create_job(title: str, pdf_url: str):
         return None
 
 
-async def update_job(job_id: int, status: str, download_url: str, completed_at: datetime, worker_id: str):
+async def update_job(
+    job_id: int,
+    *,
+    status: str = None,
+    download_url: str = None,
+    completed_at: datetime = None,
+    worker_id: str = None,
+):
     updates = {}
     if status:
         updates["status"] = status

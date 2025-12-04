@@ -1,6 +1,7 @@
 """Job endpoint handlers."""
 
 import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.database import jobs as jobs_db

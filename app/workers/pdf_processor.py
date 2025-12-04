@@ -348,9 +348,10 @@ async def process_pdf(self, job_id: int):
     """
 
     logger.info(f"Starting PDF processing for job {job_id}")
-    await db_client.init_supabase()
 
     try:
+        await db_client.init_supabase()
+
         # Get job details
         job = await get_job(job_id)
 
@@ -376,7 +377,10 @@ async def process_pdf(self, job_id: int):
         # Step 4: Update job status to completed
         logger.info(f"Updating job {job_id} status to completed")
         await update_job(
-            job_id=job_id, status="completed", download_url=csv_url, completed_at=datetime.now(UTC)
+            job_id,
+            status="completed",
+            download_url=csv_url,
+            completed_at=datetime.now(UTC),
         )
 
         logger.info(f"Successfully completed processing job {job_id}")
@@ -387,13 +391,19 @@ async def process_pdf(self, job_id: int):
 
         # Update job status to failed
         try:
+            # Ensure database client is initialized before updating
+            await db_client.init_supabase()
             await update_job(
-                job_id=job_id, status="failed", download_url=None, completed_at=datetime.now(UTC)
+                job_id,
+                status="failed",
+                completed_at=datetime.now(UTC),
             )
+            logger.info(f"Successfully marked job {job_id} as failed")
         except Exception as update_error:
-            logger.error(f"Failed to update job status: {str(update_error)}")
+            logger.error(
+                f"Failed to update job status to failed: {str(update_error)}", exc_info=True
+            )
 
         # Re-raise the exception so Celery knows the task failed
+        # Using bare 'raise' preserves the original exception traceback
         raise
-    finally:
-        await db_client.close_supabase()

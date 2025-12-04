@@ -14,7 +14,6 @@ from app.routes import router
 async def lifespan(app: FastAPI):
     await db.init_supabase()
     yield
-    await db.close_supabase()
 
 
 app = FastAPI(
