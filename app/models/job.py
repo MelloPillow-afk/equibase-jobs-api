@@ -41,33 +41,6 @@ class JobResponse(BaseModel):
     title: str = Field(..., description="Job title")
     status: JobStatus = Field(..., description="Current job status")
     pdf_url: str = Field(..., description="URL to source PDF in Supabase Storage")
-    download_url: str | None = Field(None, description="URL to processed CSV file")
-    created_at: datetime = Field(..., description="Job creation timestamp")
-    completed_at: datetime | None = Field(None, description="Job completion timestamp")
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        json_schema_extra={
-            "example": {
-                "id": 1,
-                "title": "Process Q4 Financial Report",
-                "status": "completed",
-                "pdf_url": "https://supabase.co/storage/uploads/financial-report-q4.pdf",
-                "download_url": "https://supabase.co/storage/outputs/financial-report-q4.csv",
-                "created_at": "2025-01-15T10:30:00Z",
-                "completed_at": "2025-01-15T10:40:00Z",
-            }
-        },
-    )
-
-
-class JobResponse(BaseModel):
-    """Response model for a single job."""
-
-    id: int = Field(..., description="Job ID")
-    title: str = Field(..., description="Job title")
-    status: JobStatus = Field(..., description="Current job status")
-    pdf_url: str = Field(..., description="URL to source PDF in Supabase Storage")
     file_download_url: str | None = Field(None, description="URL to processed CSV file")
     created_at: datetime = Field(..., description="Job creation timestamp")
     completed_at: datetime | None = Field(None, description="Job completion timestamp")
@@ -80,7 +53,7 @@ class JobResponse(BaseModel):
                 "title": "Process Q4 Financial Report",
                 "status": "completed",
                 "pdf_url": "https://supabase.co/storage/uploads/financial-report-q4.pdf",
-                "download_url": "https://supabase.co/storage/outputs/financial-report-q4.csv",
+                "file_download_url": "https://supabase.co/storage/outputs/financial-report-q4.csv",
                 "created_at": "2025-01-15T10:30:00Z",
                 "completed_at": "2025-01-15T10:40:00Z",
             }

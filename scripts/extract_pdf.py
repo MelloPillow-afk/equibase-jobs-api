@@ -10,6 +10,7 @@ import pdfplumber
 # Constants
 VALID_SURFACES = ["Dirt", "Turf", "All Weather", "Tapeta"]
 CSV_FIELDNAMES = [
+    "Track",
     "Date",
     "Race #",
     "Surface",
@@ -274,7 +275,7 @@ def extract_race_data(pdf_path):
             track, date_str, race_num = parse_header(text)
             if not track:
                 continue
-
+            
             date = format_date(date_str)
             distance, surface = parse_distance_surface(text)
             trainer_map = parse_trainers_footer(text)
@@ -298,6 +299,7 @@ def extract_race_data(pdf_path):
 
                 all_races.append(
                     {
+                        "Track": track,
                         "Date": date,
                         "Race #": race_num,
                         "Surface": surface,

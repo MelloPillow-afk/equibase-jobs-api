@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 # Constants
 VALID_SURFACES = ["Dirt", "Turf", "All Weather", "Tapeta"]
 CSV_FIELDNAMES = [
+    "Track",
     "Date",
     "Race #",
     "Surface",
@@ -300,6 +301,7 @@ def extract_race_data_from_pdf(pdf_bytes: bytes) -> list:
 
                 all_races.append(
                     {
+                        "Track": track,
                         "Date": date,
                         "Race #": race_num,
                         "Surface": surface,

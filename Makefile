@@ -40,6 +40,9 @@ lint:
 format:
 	ruff format app/ tests/
 
+lint-fix:
+	ruff check --select I --fix .
+
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
