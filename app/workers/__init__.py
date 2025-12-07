@@ -3,6 +3,7 @@
 import asyncio
 
 from celery import Celery
+from celery.signals import worker_process_init, worker_process_shutdown
 
 from app.config import settings
 
@@ -25,13 +26,38 @@ celery_app.conf.update(
     task_soft_time_limit=25 * 60,  # 25 minutes soft limit
 )
 
+# Global event loop for each worker process
+_loop = None
+
+
+@worker_process_init.connect
+def init_worker_process(**kwargs):
+    """Initialize a persistent event loop when worker process starts"""
+    global _loop
+    _loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(_loop)
+
+
+@worker_process_shutdown.connect
+def shutdown_worker_process(**kwargs):
+    """Clean up event loop when worker process shuts down"""
+    global _loop
+    if _loop is not None:
+        _loop.close()
+        _loop = None
+
 
 def async_celery_task(*celery_args, **celery_kwargs):
     """Decorator that makes async functions work as Celery tasks"""
 
     def decorator(func):
         def wrapper(*args, **kwargs):
-            return asyncio.run(func(*args, **kwargs))
+            global _loop
+            if _loop is None:
+                # Fallback if signal didn't fire
+                _loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(_loop)
+            return _loop.run_until_complete(func(*args, **kwargs))
 
         # Register as Celery task
         return celery_app.task(*celery_args, **celery_kwargs)(wrapper)
