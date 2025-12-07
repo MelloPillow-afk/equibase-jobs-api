@@ -49,20 +49,13 @@ class ProductionSettings(BaseConfig):
     LOG_LEVEL: str = "INFO"
 
     # CORS Configuration (must be set via env vars in production)
-    CORS_ORIGINS: list[str]
+    CORS_ORIGINS: list[str] = ["https://equibase-pdf-processor-268lkuw66-mellopillow-afks-projects.vercel.app"]
 
     # Server Configuration
     SERVER_HOST: str = "0.0.0.0"
     SERVER_PORT: int = int(os.environ.get("PORT", "8000"))
 
     def __init__(self, **kwargs):
-        # Parse CORS_ORIGINS from comma-separated string
-        cors_env = os.environ.get("CORS_ORIGINS", "")
-        if cors_env:
-            kwargs["CORS_ORIGINS"] = [origin.strip() for origin in cors_env.split(",")]
-        else:
-            kwargs["CORS_ORIGINS"] = []
-
         # Get Celery URLs from environment
         kwargs["CELERY_BROKER_URL"] = os.environ.get("CELERY_BROKER_URL", "")
         kwargs["CELERY_RESULT_BACKEND"] = os.environ.get("CELERY_RESULT_BACKEND", "")
